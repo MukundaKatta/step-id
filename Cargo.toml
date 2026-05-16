@@ -1,0 +1,15 @@
+[package]
+name = "step-id"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Stable IDs for agent steps: deterministic hash of (run_id, step_index, kind) so events and traces share keys across reruns. Zero deps."
+authors = ["Mukunda Rao Katta <mukunda.vjcs6@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/MukundaKatta/step-id"
+homepage = "https://github.com/MukundaKatta/step-id"
+documentation = "https://docs.rs/step-id"
+readme = "README.md"
+keywords = ["agent", "step", "id", "deterministic", "trace"]
+categories = ["cryptography", "data-structures"]
+exclude = [".github/*", "target/*"]
