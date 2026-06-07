@@ -1,6 +1,6 @@
-//! Pure-Rust SHA-256 (FIPS 180-4). Adequate for hashing prompts;
+//! Pure-Rust SHA-256 (FIPS 180-4). Adequate for hashing step keys;
 //! NOT a cryptographic API — no HMAC, no constant-time anything.
-//! Inlined here to keep promptver dependency-free.
+//! Inlined here to keep step-id dependency-free.
 
 const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -115,6 +115,49 @@ mod tests {
             hex(b"abc"),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
+    }
+
+    #[test]
+    fn two_block_vector() {
+        // 56-byte NIST test vector spanning two blocks.
+        assert_eq!(
+            hex(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+        );
+    }
+
+    #[test]
+    fn padding_boundaries() {
+        // The 55/56-byte boundary is where the length field no longer fits
+        // in the final block and an extra padding block is required — the
+        // classic place SHA-256 implementations break. Values verified
+        // against the reference implementation (Python hashlib).
+        let cases: &[(usize, &str)] = &[
+            (
+                55,
+                "9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318",
+            ),
+            (
+                56,
+                "b35439a4ac6f0948b6d6f9e3c6af0f5f590ce20f1bde7090ef7970686ec6738a",
+            ),
+            (
+                63,
+                "7d3e74a05d7db15bce4ad9ec0658ea98e3f06eeecf16b4c6fff2da457ddc2f34",
+            ),
+            (
+                64,
+                "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb",
+            ),
+            (
+                65,
+                "635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0",
+            ),
+        ];
+        for (n, expected) in cases {
+            let input = vec![b'a'; *n];
+            assert_eq!(hex(&input), *expected, "mismatch for {n}-byte input");
+        }
     }
 
     #[test]
